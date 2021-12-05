@@ -53,7 +53,10 @@ def evaluate_model(model_name: str):
 
 def main():
     evaluate_model("word2vec-google-news-300")
-
+    evaluate_model("fasttext-wiki-news-subwords-300")
+    evaluate_model("glove-wiki-gigaword-300")
+    evaluate_model("glove-twitter-25")
+    evaluate_model("glove-twitter-200")
 
 if __name__ == '__main__':
     main()

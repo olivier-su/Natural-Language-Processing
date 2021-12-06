@@ -4,15 +4,18 @@ import numpy as np
 import csv
 
 
-def evaluate_model(model_name: str, analysis_csv):
+def evaluate_model(model_name: str, analysis_writer):
+
+    print(f'Starting model {model_name}')
+
     model = api.load(model_name)
     synonyms_file = pd.read_csv('synonyms.csv')
     synonyms = synonyms_file.to_numpy()
     output_file = open(f'{model_name}-details.csv', 'w', newline='')
     detail_writer = csv.writer(output_file)
     detail_writer.writerow(['Question', 'Correct-answer', 'Guess-word', 'Correctness'])
-    correct_count=0
-    question_count=0
+    correct_count = 0
+    question_count = 0
     for synonym in synonyms:
 
         if synonym[0] in model.key_to_index:
@@ -32,7 +35,7 @@ def evaluate_model(model_name: str, analysis_csv):
             correctness = ''
             if synonym[1] == guess:
                 correctness = 'correct'
-                correct_count+=1
+                correct_count += 1
                 question_count += 1
             else:
                 if guess in options:
@@ -43,12 +46,9 @@ def evaluate_model(model_name: str, analysis_csv):
             detail_writer.writerow([synonym[0], synonym[1], guess, correctness])
         else:
             detail_writer.writerow([synonym[0], synonym[1], "NA", "guess"])
-
-    analysis_file = open(analysis_csv, 'a', newline='')
-    analysis_writer=csv.writer(analysis_file)
-    analysis_writer.writerow([model_name, len(model.key_to_index), correct_count, question_count, correct_count/question_count])
-    #will print many times now ,so not use this line
-    #analysis_writer.writerow('Model name','size','correct count','question count','accuracy')
+    output_file.close()
+    analysis_writer.writerow(
+        [model_name, len(model.key_to_index), correct_count, question_count, correct_count / question_count])
 
 
 def main():
@@ -57,12 +57,15 @@ def main():
     analysis_writer = csv.writer(analysis_file)
     analysis_writer.writerow(
         ['Model Name', 'Size Of Vocabulary', 'C', 'V', 'Accuracy'])
+
+    evaluate_model("word2vec-google-news-300", analysis_writer)
+    evaluate_model("fasttext-wiki-news-subwords-300", analysis_writer)
+    evaluate_model("glove-wiki-gigaword-300", analysis_writer)
+    evaluate_model("glove-twitter-25", analysis_writer)
+    evaluate_model("glove-twitter-200", analysis_writer)
+
     analysis_file.close()
-    evaluate_model("word2vec-google-news-300", analysis_csv)
-    evaluate_model("fasttext-wiki-news-subwords-300", analysis_csv)
-    evaluate_model("glove-wiki-gigaword-300", analysis_csv)
-    evaluate_model("glove-twitter-25", analysis_csv)
-    evaluate_model("glove-twitter-200", analysis_csv)
+
 
 if __name__ == '__main__':
     main()
